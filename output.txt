@@ -1,0 +1,4 @@
+(KEYWORD: if)
+(LITERAL: 3)
+(KEYWORD: eq)
+null

@@ -60,14 +60,12 @@ public class SPLLexer {
                         tokenBuilder.append(ch);
                         continue;
                     }
-                } else if (ch != ' ' && ch != '"') {
-                    // Skip other separators
-                    continue;
                 }
                 if (tokenBuilder.length() > 0) {
                     tokens.add(getToken(tokenBuilder.toString()));
                     tokenBuilder.setLength(0);
                 }
+                tokens.add(new Token(TokenType.SEPARATOR, String.valueOf(ch)));
             } else if (operators.contains(ch)) {
                 if (tokenBuilder.length() > 0) {
                     tokens.add(getToken(tokenBuilder.toString()));
@@ -91,9 +89,7 @@ public class SPLLexer {
     public static Token getToken(String tokenValue) {
         if (keywords.contains(tokenValue)) {
             return new Token(TokenType.KEYWORD, tokenValue);
-        } else if (isIntegerLiteral(tokenValue)) {
-            return new Token(TokenType.LITERAL, tokenValue);
-        } else if (isStringLiteral(tokenValue)) {
+        } else if (isLiteral(tokenValue)) {
             return new Token(TokenType.LITERAL, tokenValue);
         } else if (isValidIdentifier(tokenValue)) {
             return new Token(TokenType.IDENTIFIER, tokenValue);
@@ -103,19 +99,14 @@ public class SPLLexer {
         }
     }
 
+    // Method to check if a token is a valid literal
+    public static boolean isLiteral(String tokenValue) {
+        return tokenValue.matches("-?[1-9][0-9]*|0|\"[a-z0-9□]{0,8}\"");
+    }
+
     // Method to check if a token is a valid identifier
     public static boolean isValidIdentifier(String tokenValue) {
         return tokenValue.matches("[a-z][a-z0-9]*") && !keywords.contains(tokenValue);
-    }
-
-    // Method to check if a token is an integer literal
-    public static boolean isIntegerLiteral(String tokenValue) {
-        return tokenValue.matches("-?[1-9][0-9]*|0");
-    }
-
-    // Method to check if a token is a string literal
-    public static boolean isStringLiteral(String tokenValue) {
-        return tokenValue.matches("\"[a-z0-9□]{0,8}\"");
     }
 
     public static void main(String[] args) {
@@ -128,10 +119,8 @@ public class SPLLexer {
         try {
             List<Token> tokens = tokenize(filename);
             if (tokens != null) {
-                int count = 1;
-                for (Token token : tokens) {
-                    System.out.println(count + ": " + token);
-                    count++;
+                for (int i = 0; i < tokens.size(); i++) {
+                    System.out.println((i + 1) + ":" + tokens.get(i));
                 }
                 // Write tokens to a file
                 FileWriter writer = new FileWriter("output.txt");

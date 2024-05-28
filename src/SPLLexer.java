@@ -94,8 +94,13 @@ public class SPLLexer {
         } else if (isValidIdentifier(tokenValue)) {
             return new Token(TokenType.IDENTIFIER, tokenValue);
         } else {
-            System.out.println("Lexical Error: Invalid token - " + tokenValue);
-            return null;
+            // Check if it's an operator
+            if (operators.contains(tokenValue.charAt(0))) {
+                return new Token(TokenType.OPERATOR, tokenValue);
+            } else {
+                System.out.println("Lexical Error: Invalid token - " + tokenValue);
+                return null;
+            }
         }
     }
 

@@ -34,7 +34,7 @@ public class SPLLexer {
     static Set<Character> operators = new HashSet<>(Arrays.asList('<', '>', '=', ';', ','));
     static Set<Character> separators = new HashSet<>(Arrays.asList('□', '(', ')', '{', '}'));
 
-    // Tokenize method to process the given input file
+    // Tokenize method to process the input file
     public static List<Token> tokenize(String filename) throws IOException {
         List<Token> tokens = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -47,7 +47,7 @@ public class SPLLexer {
             char ch = (char) c;
             colNum++;
 
-            if (ch == '\n') {
+            if (ch == '#') {
                 lineNum++;
                 colNum = 0;
                 continue;

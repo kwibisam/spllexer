@@ -1,6 +1,4 @@
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,8 +6,8 @@ import java.util.Objects;
 
 
 public class SimpleSPLLexer {
-    FileReader fileReader;
-    private Hashtable<String,TokenType> words = new Hashtable<>();
+    private final BufferedReader bufferedReader;
+    private final Hashtable<String,TokenType> words = new Hashtable<>();
 //    private final String text;
     private int pos;
     char ch;
@@ -17,7 +15,7 @@ public class SimpleSPLLexer {
     private int line;
     private int col;
 //    private char c;
-    public SimpleSPLLexer(FileReader fileReader) throws IOException {
+    public SimpleSPLLexer(BufferedReader bufferedReader) throws IOException {
 //        this.text = text;
 //        pos = -1;
         line = 1;
@@ -44,7 +42,7 @@ public class SimpleSPLLexer {
         words.put("proc", TokenType.TT_PROC);
         words.put("T", TokenType.TT_T);
         words.put("F", TokenType.TT_F);
-        this.fileReader = fileReader;
+        this.bufferedReader = bufferedReader;
         advance();
     }
 
@@ -99,10 +97,12 @@ public class SimpleSPLLexer {
                 advance();
                 return new Token(";");
             case '-': {
+                char hyp = ch;
+//                bufferedReader.mark(1);
                 advance();
                 if (Character.isDigit(ch)) {
-                    retract();
-                    return makeIntegerLiteral();
+//                    bufferedReader.reset();
+                    return makeIntegerLiteral(hyp);
                 }
             }
             case '"': {
@@ -164,8 +164,19 @@ public class SimpleSPLLexer {
         return new Token(TokenType.TT_INT, sb.toString());
     }
 
+    private Token makeIntegerLiteral(char prev) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(prev);
+        do {
+            sb.append(ch);
+            advance();
+        }while (Character.isDigit(ch) && r != -1);
+        return new Token(TokenType.TT_INT, sb.toString());
+    }
+
     private void advance() throws IOException {
-        r = fileReader.read();
+//        r = fileReader.read();
+        r = bufferedReader.read();
         if(r != -1) {
             ch = (char) r;
             col++;
@@ -180,7 +191,8 @@ public class SimpleSPLLexer {
 
     private void retract() throws IOException {
 //        pos--;
-        fileReader.mark(1);
+//        fileReader.mark(1);
+        bufferedReader.mark(1);
         col--;
 //        c = text.charAt(pos);
         ch = (char) r;
@@ -237,8 +249,8 @@ public class SimpleSPLLexer {
 //        String input = "if□3(□eq□\"□□7\"##{□□add□sub";
 //        String input2 = "□(□□□4##{-67□□add□sub";
         List<Token> tokenList = new LinkedList<>();
-        FileReader fileReader = new FileReader("input.txt");
-        SimpleSPLLexer lexer = new SimpleSPLLexer(fileReader);
+        BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
+        SimpleSPLLexer lexer = new SimpleSPLLexer(reader);
         Token token = lexer.scan();
 //        tokenList.add(token);
 //        while (!Objects.equals(token.value,"EOF")) {
@@ -251,7 +263,7 @@ public class SimpleSPLLexer {
             tokenList.add(token);
             token = lexer.scan();
         }while (!Objects.equals(token.value,"EOF"));
-        fileReader.close();
+        reader.close();
 
         FileWriter writer = new FileWriter("output.txt");
         for(Token tok: tokenList) {

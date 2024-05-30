@@ -1,5 +1,5 @@
 1: if (tok_if)
-2: 3 (tok_int)
+2: -3 (tok_int)
 3: ( (tok_oparen)
 4: eq (tok_eq)
 5: "□□7" (tok_string)

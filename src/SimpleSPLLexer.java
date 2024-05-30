@@ -8,19 +8,20 @@ import java.util.Objects;
 public class SimpleSPLLexer {
     private final BufferedReader bufferedReader;
     private final Hashtable<String,TokenType> words = new Hashtable<>();
-//    private final String text;
     private int pos;
     char ch;
     int r;
     private int line;
     private int col;
-//    private char c;
     public SimpleSPLLexer(BufferedReader bufferedReader) throws IOException {
-//        this.text = text;
-//        pos = -1;
         line = 1;
         col = 0;
+        setWords();
+        this.bufferedReader = bufferedReader;
+        advance();
+    }
 
+    private void setWords() {
         words.put("if", TokenType.TT_IF);
         words.put("add", TokenType.TT_ADD);
         words.put("sub", TokenType.TT_SUB);
@@ -42,8 +43,6 @@ public class SimpleSPLLexer {
         words.put("proc", TokenType.TT_PROC);
         words.put("T", TokenType.TT_T);
         words.put("F", TokenType.TT_F);
-        this.bufferedReader = bufferedReader;
-        advance();
     }
 
     public Token scan() throws Exception {
@@ -51,14 +50,6 @@ public class SimpleSPLLexer {
             return new Token(TokenType.TT_EOF, "EOF");
         }
         //skip white space
-//        do {
-//            if (ch == '#' ) {
-//                line++;
-//                col = 0;
-//            }
-//            advance();
-//        }while (ch == '□' || ch == '#' || ch == '\n' || ch == '\r');
-
         while (ch == '□' || ch == '#' || ch == '\n' || ch == '\r') {
             if (ch == '#' ) {
                 line++;
@@ -98,10 +89,8 @@ public class SimpleSPLLexer {
                 return new Token(";");
             case '-': {
                 char hyp = ch;
-//                bufferedReader.mark(1);
                 advance();
                 if (Character.isDigit(ch)) {
-//                    bufferedReader.reset();
                     return makeIntegerLiteral(hyp);
                 }
             }
@@ -133,8 +122,6 @@ public class SimpleSPLLexer {
         throw new
                 Exception(String
                 .format("Lexical Error [line: %d, col: %d]: %s isn't a valid character", line, col, Character.toString(ch)));
-//        System.out.println("Unknown character: "+ Character.toString(ch) + " int value: "+ r);
-//        return new Token(Character.toString(ch));
     }
 
     //match strings
@@ -153,7 +140,6 @@ public class SimpleSPLLexer {
         advance();
         return new Token(literal);
     }
-
 
     private Token makeIntegerLiteral() throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -175,28 +161,18 @@ public class SimpleSPLLexer {
     }
 
     private void advance() throws IOException {
-//        r = fileReader.read();
         r = bufferedReader.read();
         if(r != -1) {
             ch = (char) r;
             col++;
             System.out.print(ch);
         }
-//        pos++;
-//        if(pos < text.length()) {
-//            c = text.charAt(pos);
-//            col++;
-//        }
     }
 
     private void retract() throws IOException {
-//        pos--;
-//        fileReader.mark(1);
         bufferedReader.mark(1);
         col--;
-//        c = text.charAt(pos);
         ch = (char) r;
-//        System.out.println("retract to: "+ch);
     }
 
     static public class Token {
@@ -246,20 +222,20 @@ public class SimpleSPLLexer {
 
 
     public static void main(String[] args) throws Exception {
-//        String input = "if□3(□eq□\"□□7\"##{□□add□sub";
-//        String input2 = "□(□□□4##{-67□□add□sub";
+
+        if (args.length != 1) {
+            System.out.println("Usage: java SPLLexer <filename>");
+            return;
+        }
+
+        String filename = args[0];
+
         List<Token> tokenList = new LinkedList<>();
-        BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+
         SimpleSPLLexer lexer = new SimpleSPLLexer(reader);
         Token token = lexer.scan();
-//        tokenList.add(token);
-//        while (!Objects.equals(token.value,"EOF")) {
-//            System.out.println(token);
-//            token = lexer.scan();
-//            tokenList.add(token);
-//        }
         do {
-//            System.out.println(token);
             tokenList.add(token);
             token = lexer.scan();
         }while (!Objects.equals(token.value,"EOF"));
